@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Plinko</title>
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2a2a2a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #b3b3b3;
+            --accent-green: #00e676;
+            --accent-red: #ff5252;
+            --accent-blue: #2979ff;
+            --accent-yellow: #ffea00;
+            --accent-orange: #ff9100;
+            --border-radius: 10px;
+            --spacing-sm: 10px;
+            --spacing-md: 15px;
+            --spacing-lg: 20px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* sửa max width 1400 -> 1800 */
+        .game-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: var(--spacing-lg);
+            padding: var(--spacing-lg);
+            width: 100%;
+            max-width: 1800px;
+        }
+
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            padding: var(--spacing-lg);
+            background: var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            width: 250px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .balance {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-primary);
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .bet-controls {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .bet-controls input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            transition: border-color var(--transition-speed);
+        }
+
+        .bet-controls input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .bet-controls button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed);
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .bet-controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .bet-controls button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .bet-button {
+
+            background: linear-gradient(135deg, var(--accent-green), #00c853);
+            font-size: 18px;
+            margin-top: var(--spacing-sm);
+
+
+        }
+
+        .bet-button:disabled {
+            background-color: #555;
+            color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .bet-button:hover {
+            background: linear-gradient(135deg, #00c853, var(--accent-green));
+        }
+
+        .all-in-btn {
+            background: linear-gradient(135deg, var(--accent-red), #d50000);
+        }
+
+        .all-in-btn:hover {
+            background: linear-gradient(135deg, #d50000, var(--accent-red));
+        }
+
+        .half-btn {
+            background: linear-gradient(135deg, #ab47bc, #7b1fa2);
+        }
+
+        .half-btn:hover {
+            background: linear-gradient(135deg, #7b1fa2, #ab47bc);
+        }
+
+        .double-btn {
+            background: linear-gradient(135deg, var(--accent-blue), #2962ff);
+        }
+
+        .double-btn:hover {
+            background: linear-gradient(135deg, #2962ff, var(--accent-blue));
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .reset-container {
+            margin-top: var(--spacing-sm);
+            width: 100%;
+        }
+
+        .reset-button {
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #ff7043, #f4511e);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed);
+            width: 100%;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .reset-button:hover {
+            background: linear-gradient(135deg, #f4511e, #ff7043);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .reset-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /*   */
+        /*  .peg-board {
+            position: relative;
+            width: 900px;
+            height: 900px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+*/
+        /* sửa peg board :  sửa size board từ 700x750 thành 900x900
+        bổ sung thêm @media cho các size  khac snhau 
+         Default layout: desktop/laptop */
+        .peg-board {
+            width: 90vw;
+            aspect-ratio: 1 / 1;
+            max-width: 900px;
+            min-width: 300px;
+            min-height: 300px;
+            max-height: 900px;
+            max-width: 900px;
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .controls-container,
+        .results,
+        .graph-container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* 📱 Tablet landscape (<=1200px) */
+        @media (max-width: 1200px) {
+            .game-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .controls-container,
+            .results,
+            .graph-container {
+                width: 90vw;
+            }
+
+            .results {
+                height: 220px;
+            }
+        }
+
+        /* 📱 Tablet portrait / Mobile large (<=768px) */
+        @media (max-width: 768px) {
+
+            .controls-container,
+            .results,
+            .peg-board,
+            .graph-container {
+                width: 95vw;
+                max-width: none;
+            }
+
+            .results {
+                height: 200px;
+            }
+
+            .bet-controls button,
+            .bet-controls input {
+                font-size: clamp(12px, 3vw, 16px);
+            }
+
+            .balance {
+                font-size: 22px;
+            }
+
+            .message-content {
+                font-size: 20px;
+                padding: 20px 30px;
+            }
+        }
+
+        /* 📱 Mobile small (<=480px) */
+        @media (max-width: 480px) {
+            .balance {
+                font-size: 18px;
+            }
+
+            .bet-controls button,
+            .bet-controls input {
+                font-size: clamp(12px, 4vw, 14px);
+                padding: 10px;
+            }
+
+            .message-content {
+                font-size: 16px;
+                padding: 15px 20px;
+            }
+        }
+
+        .peg {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transition: all 0.08s ease-out;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+
+        .peg.glow {
+            background-color: rgba(255, 215, 0, 0.8);
+            box-shadow: 0 0 4px #FFD700, 0 0 8px #FFD700, 0 0 12px rgba(255, 215, 0, 0.8);
+            animation: pulse 0.15s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                background-color: rgba(255, 215, 0, 0.6);
+                box-shadow: 0 0 4px #FFD700, 0 0 8px #FFD700, 0 0 12px rgba(255, 215, 0, 0.6);
+            }
+
+            50% {
+                background-color: rgba(255, 215, 0, 1);
+                box-shadow: 0 0 6px #FFD700, 0 0 12px #FFD700, 0 0 18px rgba(255, 215, 0, 1);
+            }
+
+            100% {
+                background-color: rgba(255, 215, 0, 0.6);
+                box-shadow: 0 0 4px #FFD700, 0 0 8px #FFD700, 0 0 12px rgba(255, 215, 0, 0.6);
+            }
+        }
+
+        .ball {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ff5252;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .ball-index {
+            font-size: 20px;
+            color: #33ff00;
+            text-align: center;
+            margin-top: 30px;
+            position: relative;
+            top: 4px;
+        }
+
+        /* sửa tỉ lệ fontsize */
+        .multiplier-box {
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50%;
+            font-weight: bold;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+
+        .multiplier-box.glow-red {
+            box-shadow: 0 0 15px 5px #ff1744, 0 0 25px 8px rgba(255, 23, 68, 0.5);
+        }
+
+        .multiplier-box.glow-yellow {
+            box-shadow: 0 0 15px 5px #ffea00, 0 0 25px 8px rgba(255, 234, 0, 0.5);
+        }
+
+        .multiplier-box.glow-orange {
+            box-shadow: 0 0 15px 5px #ff9100, 0 0 25px 8px rgba(255, 145, 0, 0.5);
+        }
+
+        .multiplier-box.glow-black {
+            box-shadow: 0 0 20px 8px rgba(255, 255, 255, 0.8), 0 0 30px 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .results {
+            width: 250px;
+            height: 600px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: var(--spacing-md);
+            background-color: var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            scrollbar-width: thin;
+            scrollbar-color: var(--bg-tertiary) var(--bg-secondary);
+        }
+
+        .results::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .results::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .results::-webkit-scrollbar-thumb {
+            background-color: var(--bg-tertiary);
+            border-radius: 4px;
+            border: 2px solid var(--bg-secondary);
+        }
+
+        .result-item {
+            margin-bottom: var(--spacing-sm);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            font-weight: bold;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border-left: 3px solid #555;
+        }
+
+        .result-item.red {
+            color: var(--accent-red);
+            border-left-color: var(--accent-red);
+        }
+
+        .result-item.yellow {
+            color: var(--accent-yellow);
+            border-left-color: var(--accent-yellow);
+        }
+
+        .result-item.orange {
+            color: var(--accent-orange);
+            border-left-color: var(--accent-orange);
+        }
+
+        .result-item.rainbow-win {
+            animation: rainbowText 2s linear infinite;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            font-size: 1.2em;
+            border-left-color: white;
+        }
+
+        @keyframes rainbowText {
+            0% {
+                color: #ff0000;
+            }
+
+            17% {
+                color: #ff00ff;
+            }
+
+            33% {
+                color: #0000ff;
+            }
+
+            50% {
+                color: #00ffff;
+            }
+
+            67% {
+                color: #00ff00;
+            }
+
+            83% {
+                color: #ffff00;
+            }
+
+            100% {
+                color: #ff0000;
+            }
+        }
+
+        .message-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .message-content {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 30px 50px;
+            border-radius: var(--border-radius);
+            font-size: 24px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            max-width: 90%;
+        }
+
+        .congratulations .message-content {
+            background: linear-gradient(135deg, #2c3e50, #3a506b);
+            color: gold;
+        }
+
+        .all-in-message .message-content {
+            background: linear-gradient(135deg, #c62828, #b71c1c);
+            color: white;
+        }
+
+        .game-over-message .message-content {
+            background: linear-gradient(135deg, #263238, #37474f);
+            color: white;
+        }
+
+        .too-many-balls-message .message-content {
+            background: linear-gradient(135deg, #0277bd, #01579b);
+            color: white;
+        }
+
+        .invalid-bet-message .message-content {
+            background: linear-gradient(135deg, #ef6c00, #e65100);
+            color: white;
+        }
+
+        .insufficient-balance-message .message-content {
+            background: linear-gradient(135deg, #6a1b9a, #4a148c);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .max-win-container {
+            text-align: center;
+            margin-top: var(--spacing-sm);
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--accent-green);
+            text-shadow: 0 0 5px rgba(0, 230, 118, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .max-win-container.visible {
+            opacity: 1;
+        }
+
+        .graph-container {
+            width: 700px;
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-lg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .graph-bar {
+            position: absolute;
+            bottom: 0;
+            width: 6px;
+            transition: height 0.5s;
+        }
+
+        .graph-content {
+            position: absolute;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            transition: transform 0.3s;
+        }
+
+        @media (max-width: 1200px) {
+            .game-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .controls-container,
+            .results {
+                width: 700px;
+                margin-bottom: var(--spacing-md);
+            }
+
+            .results {
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .peg-board,
+            .graph-container,
+            .controls-container,
+            .results {
+                width: 90vw;
+                max-width: 700px;
+            }
+
+            .peg-board {
+                height: 90vw;
+                max-height: 750px;
+            }
+
+            .graph-container {
+                height: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .balance {
+                font-size: 20px;
+            }
+
+            .bet-controls button {
+                padding: 10px;
+            }
+
+            .message-content {
+                font-size: 18px;
+                padding: 20px 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-wrapper">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div class="controls-container">
+                <div class="balance">Balance: ₿<span id="balance">1,000</span></div>
+                <div class="bet-controls">
+
+                    <div class="input-group">
+                        <label for="betAmount" style="font-size: 14px; color: #ccc; margin-bottom: 4px;">
+                            Bet amount
+                        </label>
+                        <input type="text" id="betAmount" value="100" min="1" oninput="formatInputValue(this)"
+                            placeholder="Enter bet amount"
+                            style="padding: 10px; font-size: 16px; border-radius: 6px; border: none; width: 100%;">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="ballCount" style="font-size: 14px; color: #ccc; margin-bottom: 4px;">
+                            Balls per bet
+                        </label>
+                        <input type="number" id="ballCount" value="1" min="1" max="50"
+                            placeholder="Enter number of balls"
+                            style="padding: 10px; font-size: 16px; border-radius: 6px; border: none; width: 100%;">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="targetport" style="font-size: 14px; color: #ccc; margin-bottom: 4px;">
+                            Target port
+                        </label>
+                        <input type="number" id="targetport" value="0.2" min="0.2" max="1000"
+                            placeholder="Enter number of balls"
+                            style="padding: 10px; font-size: 16px; border-radius: 6px; border: none; width: 100%;">
+                    </div>
+
+                    <button onclick="halveBet()" class="half-btn">1/2</button>
+                    <button onclick="doubleBet()" class="double-btn">2x</button>
+                    <button onclick="allIn()" class="all-in-btn">ALL IN</button>
+                    <!-- <button id="placeBetBtn" onmousedown="startAutoBet()" onmouseup="stopAutoBet()" onmouseleave="stopAutoBet()"
+            class="bet-button">PLACE BET</button> -->
+                    <button id="placeBetBtn" onclick="placeBet()" class="bet-button">PLACE BET</button>
+                </div>
+            </div>
+            <div class="reset-container">
+                <button class="reset-button" onclick="resetGame()">Reset Game</button>
+            </div>
+        </div>
+        <div class="game-container">
+            <div class="graph-container" id="graphContainer"></div>
+            <div class="peg-board" id="pegBoard"></div>
+            <div id="maxWin" class="max-win-container"></div>
+        </div>
+        <div class="results" id="results"></div>
+    </div>
+
+    <!-- Message overlays -->
+    <div class="message-overlay congratulations" id="congratulations">
+        <div class="message-content">🎉 Congratulations, you reached a Milli! 🎉</div>
+    </div>
+    <div class="message-overlay all-in-message" id="allInMessage">
+        <div class="message-content">🎉 You went all in! Good Luck 🤞🤞 🎉</div>
+    </div>
+    <div class="message-overlay too-many-balls-message" id="tooManyBallsMessage">
+        <div class="message-content">⚠️ Too many balls in play! Wait for some to finish.</div>
+    </div>
+    <div class="message-overlay invalid-bet-message" id="invalidBetMessage">
+        <div class="message-content">❌ Invalid bet amount! Please check your balance and input.</div>
+    </div>
+    <div class="message-overlay game-over-message" id="gameOverMessage">
+        <div class="message-content">🔞 GAME OVER! GAMBLE RESPONSIBLY 🔞</div>
+    </div>
+    <div class="message-overlay insufficient-balance-message" id="insufficientBalanceMessage">
+        <div class="message-content">💸 Insufficient Balance! Reset the game to continue.</div>
+    </div>
+
+    <script>
+        // Game state variables
+        let balance = 10000; // tiền mặc định ban dầu 
+        const multipliers = [1000, 130, 26, 9, 4, 2, 1, 0.2, 0.2, 0.2, 1, 2, 4, 9, 26, 130, 1000];
+        const pegRows = 16;         //control số lượng cột
+        const pegSpacing = 50;      // controll khoảng cách giữa các cột   swar40 -> 50
+        const ballSize = 20;        // control ballsize
+        const pegSize = 20;         // bổ sung thêm pegsize để controll size của các điểm của tam giác
+        const gravity = 0.05;       // tốc độ bóng rơi mặc định
+        const bounceDamping = 0.7;  // tốc độ bóng nảy mặc định
+        const boardSize = 900;      // bổ sung size mặc định của pegboard
+        const pegBoard = document.getElementById('pegBoard');
+        const resultsDiv = document.getElementById('results');
+        const graphContainer = document.getElementById('graphContainer');
+        let balls = [];
+        let pegs = [];
+        let balanceHistory = [balance];
+        let activeBallCount = 0;
+        // No limit on maximum balls
+        let maxWin = 0;
+
+        // Message handling
+        let messageQueue = [];
+        let isShowingMessage = false;
+        let messageCooldowns = new Map();
+
+        // Initialize game
+        initializeGame();
+
+        function initializeGame() {
+            createPegs();
+            createMultiplierBoxes();
+            updateBalance();
+
+            // update lại font chữ của các multiplybox khi thay đổi responsiveF
+            const resizeObserver = new ResizeObserver(() => {
+                const boxes = document.querySelectorAll('.multiplier-box');
+                boxes.forEach(box => {
+                    const height = box.getBoundingClientRect().height;
+                    box.style.fontSize = `${height * 0.55}px`;
+                });
+            });
+
+            // Theo dõi thay đổi kích thước pegBoard
+            resizeObserver.observe(pegBoard);
+        }
+
+
+        // Create pegs on the board
+        // function createPegs() {
+        //     for (let row = 2; row <= pegRows; row++) {
+        //         for (let col = 0; col < row; col++) {
+        //             const peg = document.createElement('div');
+        //             peg.className = 'peg';
+        //             peg.style.left = `${(pegBoard.offsetWidth / 2) - (row * pegSpacing / 2) + col * pegSpacing + 15}px`;
+        //             peg.style.top = `${row * pegSpacing}px`;
+        //             peg.style.width = `${pegSize}px`;
+        //             peg.style.height = `${pegSize}px`;
+        //             pegBoard.appendChild(peg);
+        //             pegs.push(peg);
+        //         }
+        //     }
+        // }
+
+        function createPegs() {
+            const pegSpacing = boardSize / 18;
+            const pegSize = pegSpacing * 0.4;
+
+            const pegSpacingPercent = (pegSpacing / boardSize) * 100;
+            const pegSizePercent = (pegSize / boardSize) * 100;
+
+            const triangleWidthPercent = (pegRows - 1) * pegSpacingPercent + pegSizePercent;
+            const triangleStartLeft = 50 - (triangleWidthPercent / 2);
+
+            for (let row = 2; row <= pegRows; row++) {
+                const rowOffsetPercent = ((pegRows - row) * pegSpacingPercent) / 2;
+
+                for (let col = 0; col < row; col++) {
+                    const peg = document.createElement('div');
+                    peg.className = 'peg';
+                    peg.style.width = `${pegSizePercent}%`;
+                    peg.style.height = `${pegSizePercent}%`;
+                    peg.style.position = 'absolute';
+
+                    // 🧠 Căn theo tâm ma trận peg đã tính sẵn
+                    const leftPercent = triangleStartLeft + rowOffsetPercent + col * pegSpacingPercent;
+                    const topPercent = row * pegSpacingPercent;
+
+                    peg.style.left = `${leftPercent}%`;
+                    peg.style.top = `${topPercent}%`;
+
+                    pegBoard.appendChild(peg);
+                    pegs.push(peg);
+                }
+            }
+        }
+
+        // Create multiplier boxes at the bottom
+        // function createMultiplierBoxes() {
+        //     const boxHeight = 30;
+        //     const boxWidth = 40;
+        //     const boxSpacing = pegSpacing;
+        //     const lastRowY = pegRows * pegSpacing;
+        //     const boxY = lastRowY + 20;
+
+        //     const totalWidth = multipliers.length * boxSpacing;
+        //     const startX = (pegBoard.offsetWidth - totalWidth) / 2;
+
+        //     for (let i = 0; i < multipliers.length; i++) {
+        //         const multiplierValue = multipliers[i];
+
+        //         const box = document.createElement('div');
+        //         box.className = 'multiplier-box';
+
+        //         // ✅ Hiển thị text và gán giá trị
+        //         box.textContent = `${multiplierValue}x`;
+        //         box.dataset.value = multiplierValue.toString(); // Gán đúng dạng số làm chuỗi
+
+        //         // ✅ Vị trí
+        //         const boxLeft = startX + (i * boxSpacing);
+        //         box.style.left = `${boxLeft}px`;
+        //         box.style.top = `${boxY}px`;
+
+        //         // ✅ Style theo giá trị
+        //         if (multiplierValue === 1000) {
+        //             box.style.background = 'linear-gradient(135deg, #ff1744, #d50000)';
+        //             box.dataset.glowClass = 'glow-red';
+        //         } else if (multiplierValue === 0.2) {
+        //             box.style.background = 'linear-gradient(135deg, #ffea00, #ffd600)';
+        //             box.style.color = 'black';
+        //             box.dataset.glowClass = 'glow-yellow';
+        //         } else if (multiplierValue === 130 || multiplierValue === 2) {
+        //             box.style.background = 'linear-gradient(135deg, #ff9100, #ff6d00)';
+        //             box.dataset.glowClass = 'glow-orange';
+        //         } else {
+        //             box.style.background = 'linear-gradient(135deg, #424242, #212121)';
+        //             box.dataset.glowClass = 'glow-black';
+        //         }
+
+        //         pegBoard.appendChild(box);
+        //     }
+        // }
+
+        function createMultiplierBoxes() {
+            const pegSpacing = boardSize / 18;
+            const boxSpacing = pegSpacing;
+            const boxWidth = boxSpacing * 0.9;
+            const boxHeight = boxSpacing * 0.7;
+
+            // % tương ứng với kích thước board
+            const pegSpacingPercent = (pegSpacing / boardSize) * 100;
+            const boxWidthPercent = (boxWidth / boardSize) * 100;
+            const boxHeightPercent = (boxHeight / boardSize) * 100;
+            const pegSizePercent = (pegSpacing * 0.4 / boardSize) * 100;
+
+            // Top của multiplier box nằm dưới hàng cuối
+            const boxY = (pegRows + 1) * pegSpacing;
+            const boxYPercent = (boxY / boardSize) * 100;
+
+            // 🎯 Tính điểm bắt đầu (góc trái) của tam giác peg
+            const triangleWidthPercent = (pegRows - 1) * pegSpacingPercent + pegSizePercent;
+            const triangleStartLeft = 48.5 - (triangleWidthPercent / 2);
+
+            for (let i = 0; i < multipliers.length; i++) {
+                const multiplierValue = multipliers[i];
+
+                const box = document.createElement('div');
+                box.className = 'multiplier-box';
+                box.textContent = `${multiplierValue}x`;
+                box.dataset.value = multiplierValue.toString();
+
+                // 📐 Vị trí chính xác giữa mỗi peg
+                const boxLeftPercent = triangleStartLeft + i * pegSpacingPercent - (boxWidthPercent / 2);
+
+                // Style
+                box.style.position = 'absolute';
+                box.style.left = `${boxLeftPercent}%`;
+                box.style.top = `${boxYPercent}%`;
+                box.style.width = `${boxWidthPercent}%`;
+                box.style.height = `${boxHeightPercent * 3 / 4}%`;
+                box.style.aspectRatio = `${boxWidthPercent} / ${boxHeightPercent}`;
+                // box.style.font = `${boxHeightPercent * 0.75}%`
+                box.style.fontSize = '50%';
+                if (multiplierValue === 1000) {
+                    box.style.background = 'linear-gradient(135deg, #ff1744, #d50000)';
+                    box.dataset.glowClass = 'glow-red';
+                } else if (multiplierValue === 0.2) {
+                    box.style.background = 'linear-gradient(135deg, #ffea00, #ffd600)';
+                    box.style.color = 'black';
+                    box.dataset.glowClass = 'glow-yellow';
+                } else if (multiplierValue === 130 || multiplierValue === 2) {
+                    box.style.background = 'linear-gradient(135deg, #ff9100, #ff6d00)';
+                    box.dataset.glowClass = 'glow-orange';
+                } else {
+                    box.style.background = 'linear-gradient(135deg, #424242, #212121)';
+                    box.dataset.glowClass = 'glow-black';
+                }
+
+                pegBoard.appendChild(box);
+
+            }
+        }
+
+
+
+        // Update balance display and history
+        function updateBalance() {
+            document.getElementById('balance').textContent = balance.toLocaleString();
+            balanceHistory.push(balance);
+            updateGraph();
+        }
+
+        // Format numbers with commas
+        function formatNumber(num) {
+            return num.toLocaleString();
+        }
+
+        // Format input value with commas
+        function formatInputValue(input) {
+            const value = parseInt(input.value.replace(/,/g, ''));
+            if (!isNaN(value) && value >= 1000) {
+                input.value = value.toLocaleString();
+            }
+        }
+
+        // Halve the current bet
+        function halveBet() {
+            const betInput = document.getElementById('betAmount');
+            const currentBet = parseInt(betInput.value.replace(/,/g, ''));
+            const newBet = Math.max(1, Math.floor(currentBet / 2));
+            betInput.value = newBet.toLocaleString();
+        }
+
+        // Double the current bet
+        function doubleBet() {
+            const betInput = document.getElementById('betAmount');
+            const currentBet = parseInt(betInput.value.replace(/,/g, ''));
+            const newBet = Math.min(balance, currentBet * 2);
+            betInput.value = newBet.toLocaleString();
+        }
+
+        // Apply glow effect to a peg
+        function applyGlow(peg) {
+            peg.classList.remove('glow');
+            void peg.offsetWidth; // Force reflow to restart animation
+            peg.classList.add('glow');
+            setTimeout(() => peg.classList.remove('glow'), 150);
+        }
+
+        // Apply glow effect to a multiplier box
+        function applyMultiplierGlow(box) {
+            box.classList.remove('glow-red', 'glow-yellow', 'glow-orange', 'glow-black');
+            box.classList.add(box.dataset.glowClass);
+            setTimeout(() => {
+                box.classList.remove(box.dataset.glowClass);
+            }, 500);
+        }
+
+        // Update the graph with balance history
+        function updateGraph() {
+            let graphContent = document.querySelector('.graph-content');
+            if (!graphContent) {
+                graphContent = document.createElement('div');
+                graphContent.className = 'graph-content';
+                graphContainer.appendChild(graphContent);
+            }
+
+            graphContent.innerHTML = '';
+
+            const minBalance = Math.min(...balanceHistory);
+            const maxBalance = Math.max(...balanceHistory);
+            const range = maxBalance - minBalance || 1; // Prevent division by zero
+
+            const barWidth = 6;
+            const barSpacing = 2;
+            const totalBarWidth = barWidth + barSpacing;
+            const maxBars = Math.floor(graphContainer.offsetWidth / totalBarWidth);
+
+            const recentHistory = balanceHistory.slice(-maxBars);
+
+            recentHistory.forEach((value, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'graph-bar';
+                bar.style.left = `${index * totalBarWidth}px`;
+
+                // Calculate height as a percentage of the container height
+                const heightPercentage = ((value - minBalance) / range) * 100;
+                bar.style.height = `${Math.max(2, heightPercentage)}px`; // Minimum height of 2px
+
+                // Color based on comparison to initial balance
+                if (value >= 1000) {
+                    bar.style.background = 'linear-gradient(to top, #00e676, #00c853)';
+                } else {
+                    bar.style.background = 'linear-gradient(to top, #ff5252, #d50000)';
+                }
+
+                graphContent.appendChild(bar);
+            });
+
+            graphContent.style.transform = `translateX(${Math.max(0, graphContainer.offsetWidth - (recentHistory.length * totalBarWidth))}px)`;
+        }
+
+        // Check if game is over
+        function checkGameOver() {
+            if (balance <= 0 && balls.length === 0) {
+                ///showMessage('gameOverMessage', 3000);
+            }
+        }
+
+        // Message queue system
+        function showMessage(messageId, duration = 2000) {
+            const now = Date.now();
+            const lastShown = messageCooldowns.get(messageId) || 0;
+
+            // If the message was shown in the last 2 seconds, don't show it again
+            if (now - lastShown < 2000) {
+                return;
+            }
+
+            messageCooldowns.set(messageId, now);
+            const messageElement = document.getElementById(messageId);
+
+            messageElement.style.display = 'flex';
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, duration);
+        }
+
+        // Place a bet
+        // Updated: Ball will dynamically select closest valid target box with matching multiplier value
+
+        // 1. placeBet
+        function placeBet() {
+
+            balls = [];
+
+            const betInput = document.getElementById('betAmount');
+            const betAmount = parseInt(betInput.value.replace(/,/g, ''));
+            const ballCountInput = document.getElementById('ballCount');
+            const port = parseFloat(document.getElementById('targetport').value);
+            const ballCount = parseInt(ballCountInput.value) || 1;
+            const perBallAmount = Math.floor(betAmount / ballCount);
+
+            if (isNaN(betAmount) || betAmount > balance || betAmount < 1 || perBallAmount < 1) {
+                showMessage('invalidBetMessage', 2000);
+                stopAutoBet();
+                return;
+            }
+
+            //balance -= betAmount;
+            updateBalance();
+
+            if (balance <= 0) {
+                checkGameOver();
+                stopAutoBet();
+            }
+
+            activeBallCount += ballCount;
+
+            const multiplierBoxes = document.querySelectorAll('.multiplier-box');
+            const pegRect = pegBoard.getBoundingClientRect();
+            const multi = [0.2, 1, 2, 4, 9];
+            for (let i = 0; i < ballCount; i++) {
+
+                if (balance - betAmount < 0) return;
+
+
+                const randomValue = multi[i % multi.length];
+
+                const candidateBoxes = Array.from(multiplierBoxes).filter(box => {
+                    const value = parseFloat(box.dataset.value);
+                    return !isNaN(value) && value === randomValue;
+                });
+
+                if (candidateBoxes.length === 0) {
+                    console.warn(`⚠ Không tìm thấy ô nào với value = ${randomValue}`);
+                    continue;
+                }
+
+                const targetBox = candidateBoxes[Math.floor(Math.random() * candidateBoxes.length)];
+                const targetRect = targetBox.getBoundingClientRect();
+                const targetX = targetRect.left - pegRect.left + targetBox.offsetWidth / 2 - ballSize / 2;
+
+
+                //bỏ đi khong cần dùng nữa 
+
+                // const indexLabel = document.createElement('div');
+                // indexLabel.className = 'ball-index';
+                // indexLabel.textContent = `${i + 1}`;
+                // indexLabel.style.position = 'absolute';
+                // indexLabel.style.left = `${targetX + ballSize / 2}px`;
+                // indexLabel.style.top = `${targetRect.top - pegRect.top + targetBox.offsetHeight - 35}px`;
+                // indexLabel.style.transform = 'translateX(-50%)';
+                // indexLabel.style.fontSize = '23px';
+                // indexLabel.style.color = 'limegreen';
+                // indexLabel.style.pointerEvents = 'none';
+                // pegBoard.appendChild(indexLabel);
+
+                console.log(`Ball ${i + 1} → target value: ${randomValue}`);
+
+                const ball = createBall(betAmount, i, randomValue);
+                balls.push(ball);
+
+                const delay = i * 500;
+                const velocityX = 0;//(Math.random() - 0.5) * 2;
+                const velocityY = 0;
+
+                setTimeout(() => {
+                    if (balance - betAmount < 0) return;
+                    balance -= betAmount;
+                    updateBalance();
+                    animateBall(ball, velocityX, velocityY, betAmount);
+
+                }, delay);
+            }
+        }
+
+        // 2. createBall
+        // function createBall(betAmount, index, targetValue) {
+        //     const ball = document.createElement('div');
+        //     ball.className = 'ball';
+        //     ball.textContent = index + 1;
+        //     ball.style.left = `${pegBoard.offsetWidth / 2 - ballSize / 2 + (Math.random() - 0.5) * 20}px`;
+        //     ball.style.top = `0px`;
+        //     ball.style.width = `${ballSize}px`;
+        //     ball.style.height = `${ballSize}px`;
+
+        //     const allBoxes = document.querySelectorAll('.multiplier-box');
+        //     const targetList = Array.from(allBoxes)
+        //         .filter(box => box.dataset.value == targetValue)
+        //         .map(box => parseFloat(box.style.left) + box.offsetWidth / 2 - ballSize / 2);
+
+        //     console.log(`Ball ${index + 1} → Target list:`, targetList);
+
+        //     ball.dataset.betAmount = betAmount.toString();
+        //     ball.dataset.targetValue = targetValue;
+        //     ball.dataset.targetList = JSON.stringify(targetList);
+
+        //     pegBoard.appendChild(ball);
+        //     return ball;
+        // }
+
+        function createBall(betAmount, index, targetValue) {
+            const ballSizePercent = (ballSize / boardSize) * 100;
+
+            // 🎯 Vị trí xuất phát giữa pegBoard, có jitter nhẹ
+            const jitterRange = 8; // ±4%
+            const randomOffset = (Math.random() - 0.5) * jitterRange;
+            const leftPercent = 50 + randomOffset - (ballSizePercent / 2);
+
+            const ball = document.createElement('div');
+            ball.className = 'ball';
+            ball.textContent = index + 1;
+
+            ball.style.left = `${leftPercent}%`;
+            ball.style.top = `-5%`;
+            ball.style.width = `${ballSizePercent}%`;
+            ball.style.height = `${ballSizePercent}%`;
+
+            // 🎯 Tìm các box có value đúng với target
+            const allBoxes = document.querySelectorAll('.multiplier-box');
+            const targetBoxes = Array.from(allBoxes).filter(box => box.dataset.value == targetValue);
+
+            // Gán dữ liệu cho animateBall sử dụng
+            ball.dataset.betAmount = betAmount.toString();
+            ball.dataset.targetValue = targetValue;
+            ball.targetBoxes = targetBoxes;
+
+            pegBoard.appendChild(ball);
+            return ball;
+        }
+
+        // 3. animateBall
+        // function animateBall(ball, velocityX, velocityY, betAmount) {
+        //     const targetList = JSON.parse(ball.dataset.targetList || '[]');
+        //     const thirdPegY = pegs[2] ? parseFloat(pegs[2].style.top) : 0;
+        //     const bounceHeightMultiplier = 2;
+
+        //     let bouncingUntil = 0;
+        //     let nearestPegY = Infinity;
+        //     let collided = false;
+        //     const hitPegs = new Set();
+
+        //     function dropBall() {
+        //         const currentX = parseFloat(ball.style.left);
+        //         const currentY = parseFloat(ball.style.top);
+        //         const now = Date.now();
+
+        //         velocityX += currentY > thirdPegY ? (Math.random() - 0.5) * 0.015 : 0;
+        //         velocityY += gravity;
+
+        //         let newLeft = currentX + velocityX;
+        //         let newTop = currentY + velocityY;
+
+        //         const closestTargetX = targetList.reduce((closest, x) =>
+        //             Math.abs(x - currentX) < Math.abs(closest - currentX) ? x : closest, targetList[0]);
+
+        //         const distanceX = closestTargetX - currentX;
+        //         const direction = Math.sign(distanceX);
+        //         const distanceRatio = Math.min(Math.abs(distanceX) / 300, 1);
+
+        //         collided = false;
+        //         const ballCenterX = currentX + ballSize / 2;
+        //         const ballCenterY = currentY + ballSize / 2;
+
+        //         for (const peg of pegs) {
+        //             const pegLeft = parseFloat(peg.style.left);
+        //             const pegTop = parseFloat(peg.style.top);
+        //             const pegCenterX = pegLeft + peg.offsetWidth / 2;
+        //             const pegCenterY = pegTop + peg.offsetHeight / 2;
+
+        //             const dx = ballCenterX - pegCenterX;
+        //             const dy = ballCenterY - pegCenterY;
+        //             const distance = Math.sqrt(dx * dx + dy * dy);
+
+        //             if (distance < (ballSize / 2 + peg.offsetWidth / 2)) {
+        //                 collided = true;
+
+        //                 const angle = Math.atan2(dy, dx);
+        //                 const verticalRatio = Math.abs(Math.cos(angle));
+
+        //                 if (!hitPegs.has(peg)) {
+        //                     // ✅ Chỉ nảy lần đầu tiên
+        //                     const randomForce = 0.1 + Math.random() * 0.05;
+        //                     const bounceVertical = 0.4 + Math.random() * 0.2;
+
+        //                     velocityX += Math.cos(angle) * randomForce * 2;
+        //                     velocityY = -Math.abs(Math.sin(angle)) * bounceVertical * bounceHeightMultiplier;
+
+        //                     newTop = currentY + velocityY;
+        //                     bouncingUntil = now + (50 + 60 * verticalRatio);
+        //                     hitPegs.add(peg);
+        //                     applyGlow(peg);
+        //                 } else {
+        //                     // 🧱 Các lần sau: không nảy, chỉ dừng tại viền peg
+        //                     const pushBackDistance = (ballSize / 2 + peg.offsetWidth / 2) - distance;
+        //                     const pushAngle = Math.atan2(dy, dx);
+
+        //                     newLeft += Math.cos(pushAngle) * pushBackDistance;
+        //                     newTop += Math.sin(pushAngle) * pushBackDistance;
+
+        //                     velocityY = Math.min(velocityY, 1); // tránh trượt xuyên xuống
+        //                 }
+        //             }
+
+        //             if (pegCenterY > newTop && pegCenterY < nearestPegY) {
+        //                 nearestPegY = pegCenterY;
+        //             }
+        //         }
+
+        //         // 🧲 Hút về target nếu không va chạm và đã vượt peg gần nhất
+        //         if (!collided && newTop > nearestPegY && currentY > thirdPegY) {
+        //             const maxForce = 0.8;
+        //             const minForce = 0.3;
+        //             const targetForce = direction * (minForce + (maxForce - minForce) * Math.pow(distanceRatio, 1.5));
+        //             const lerpFactor = 0.12;
+        //             velocityX = velocityX * (1 - lerpFactor) + targetForce * lerpFactor;
+        //         }
+
+        //         // Clamp trái/phải để không rơi khỏi màn
+        //         newLeft = Math.max(0, Math.min(pegBoard.offsetWidth - ballSize, newLeft));
+
+        //         const multiplierBoxes = document.querySelectorAll('.multiplier-box');
+        //         const boxY = parseFloat(multiplierBoxes[0].style.top);
+        //         if (newTop >= boxY - ballSize) {
+        //             finishBall(ball, newLeft, betAmount);
+        //             return;
+        //         }
+
+        //         ball.style.left = `${newLeft}px`;
+        //         ball.style.top = `${newTop}px`;
+        //         requestAnimationFrame(dropBall);
+        //     }
+
+        //     requestAnimationFrame(dropBall);
+        // }
+        function animateBall(ball, velocityX, velocityY, betAmount) {
+            const bounceHeightMultiplier = 1;
+
+            const hitPegs = new Set();
+            const hitPegs2 = new Set();
+            let nearestPegY = Infinity;
+            let collided = false;
+            let bouncingUntil = 0;
+
+            function dropBall() {
+                const now = Date.now();
+                const thirdPegY = pegs[4] ? parseFloat(pegs[4].style.top) : 0;
+
+                const pegBoardWidth = pegBoard.offsetWidth;
+                const pegBoardHeight = pegBoard.offsetHeight;
+                const scaleFactor = pegBoardWidth / boardSize;
+
+                const ballSizePx = ball.offsetWidth;
+                const ballSizePercent = (ballSizePx / pegBoardWidth) * 100;
+                const gravityPercent = gravity * scaleFactor;
+
+                const currentLeft = parseFloat(ball.style.left); // %
+                const currentTop = parseFloat(ball.style.top);   // %
+
+                const currentLeftPx = (currentLeft / 100) * pegBoardWidth;
+
+                // 🎯 Tính lại vị trí các box đích theo % tại thời điểm hiện tại
+                const boxCentersPercent = (ball.targetBoxes || []).map(box => {
+                    const boxRect = box.getBoundingClientRect();
+                    const boardRect = pegBoard.getBoundingClientRect();
+                    const centerPx = boxRect.left - boardRect.left + boxRect.width / 2 - (ballSizePx / 2);
+                    return (centerPx / pegBoardWidth) * 100;
+                });
+
+                const closestTargetX = boxCentersPercent.reduce((closest, percentX) =>
+                    Math.abs(percentX - currentLeft) < Math.abs(closest - currentLeft) ? percentX : closest,
+                    boxCentersPercent[0]
+                );
+
+                const distanceX = closestTargetX - currentLeft;
+                const direction = Math.sign(distanceX);
+                const distanceRatio = Math.min(Math.abs(distanceX) / (20 * scaleFactor), 1);
+
+                if (currentTop > thirdPegY) {
+                    velocityX += (Math.random() - 0.5) * 0.015 * scaleFactor;
+                }
+                velocityY += gravityPercent;
+
+                let newLeft = currentLeft + velocityX;
+                let newTop = currentTop + velocityY;
+
+                const ballCenterX = newLeft + ballSizePercent / 2;
+                const ballCenterY = newTop + ballSizePercent / 2;
+                collided = false;
+                for (const peg of pegs) {
+                    const pegLeft = parseFloat(peg.style.left); // %
+                    const pegTop = parseFloat(peg.style.top);   // %
+                    const pegSizePx = peg.offsetWidth;
+                    const pegSizePercent = (pegSizePx / pegBoardWidth) * 100;
+
+                    const pegCenterX = pegLeft + pegSizePercent / 2;
+                    const pegCenterY = pegTop + pegSizePercent / 2;
+
+                    const dx = ballCenterX - pegCenterX;
+                    const dy = ballCenterY - pegCenterY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    const collisionThreshold = (ballSizePercent / 2 + pegSizePercent / 2);
+
+                    if (distance < collisionThreshold) {
+                        collided = true;
+
+                        const angle = Math.atan2(dy, dx);
+                        const verticalRatio = Math.abs(Math.cos(angle));
+
+                        if (!hitPegs.has(peg)) {
+                            // ✅ Lần đầu tiên chạm: Nảy mạnh
+                            const randomForce = (0.1 + Math.random() * 0.04) * scaleFactor;
+                            const bounceVertical = (0.3 + Math.random() * 0.02) * scaleFactor;
+
+                            velocityX += Math.cos(angle) * randomForce * 2;
+                            velocityY = -Math.abs(Math.sin(angle)) * bounceVertical * bounceHeightMultiplier;
+                            newTop = currentTop + velocityY;
+
+                            bouncingUntil = now + (30 + 40 * verticalRatio);
+                            hitPegs.add(peg);
+                            applyGlow(peg);
+                        } else {
+                            if (!hitPegs2.has(peg)) {
+                                // ✅ Lần chạm thứ hai: Nảy nhẹ
+                                const randomForce = (0.1 + Math.random() * 0.05) * scaleFactor;
+                                const bounceVertical = (0.1 + Math.random() * 0.02) * scaleFactor;
+
+                                velocityX += Math.cos(angle) * randomForce * 2;
+                                velocityY = -Math.abs(Math.sin(angle)) * bounceVertical * bounceHeightMultiplier;
+
+                                hitPegs2.add(peg);
+                            } else {
+                                // 🧱 Sau 2 lần: trượt trên viền peg
+                                const pushBackDistance = collisionThreshold - distance;
+                                const pushAngle = Math.atan2(dy, dx);
+
+                                newLeft += Math.cos(pushAngle) * pushBackDistance;
+                                newTop += Math.sin(pushAngle) * pushBackDistance;
+
+                                velocityY = Math.min(velocityY * scaleFactor, 0.1 * scaleFactor); // hạn chế xuyên
+                            }
+                        }
+                    }
+
+                    // Lưu lại peg gần nhất bên dưới để xử lý hút
+                    if (pegCenterY > newTop && pegCenterY < nearestPegY) {
+                        nearestPegY = pegCenterY;
+                    }
+                }
+
+                if (!collided && newTop > nearestPegY && currentTop > thirdPegY) {
+                    const maxForce = 0.4 * scaleFactor;
+                    const minForce = 0.15 * scaleFactor;
+                    const targetForce = direction * (minForce + (maxForce - minForce) * Math.pow(distanceRatio, 1.5));
+                    const lerpFactor = 0.12;
+                    velocityX = velocityX * (1 - lerpFactor) + targetForce * lerpFactor;
+                }
+
+                newLeft = Math.max(0, Math.min(80 - ballSizePercent, newLeft));
+
+                // Lấy vị trí top % của multiplier box
+                const boxElement = document.querySelector('.multiplier-box');
+                const boxTopPercent = boxElement ? parseFloat(boxElement.style.top) : 100;
+
+                // Nếu chạm đáy multiplier box (tính theo %)
+                if (newTop >= boxTopPercent - ballSizePercent) {
+                    // Tính lại vị trí thực tế theo px dựa trên % hiện tại
+                    const finalX = (newLeft / 100) * pegBoard.offsetWidth;
+                    finishBall(ball, finalX, betAmount);
+                    return;
+                }
+
+                ball.style.left = `${newLeft}%`;
+                ball.style.top = `${newTop}%`;
+                requestAnimationFrame(dropBall);
+            }
+
+            requestAnimationFrame(dropBall);
+        }
+
+
+
+
+        // Finish ball animation and calculate winnings
+
+        // function finishBall(ball, newLeft, betAmount) {
+        //     if (pegBoard.contains(ball)) pegBoard.removeChild(ball);
+
+        //     console.log("finish ball " + newLeft);
+        //     activeBallCount--;
+        //     if (activeBallCount === 0) {
+        //         const btn = document.getElementById('placeBetBtn');
+        //         btn.disabled = false;
+        //         btn.style.backgroundColor = '#2979ff';
+        //         btn.style.cursor = 'pointer';
+        //     }
+
+        //     balls = balls.filter(b => b !== ball);
+
+        //     const ballCenterX = newLeft + ballSize / 2;
+        //     let hitMultiplier = false;
+
+        //     // ✅ Kiểm tra xem có đúng 1 trong các targetList không
+        //     const targetList = JSON.parse(ball.dataset.targetList || '[]');
+        //     const margin = 18;
+        //     const closestTarget = targetList.reduce((closest, x) =>
+        //         Math.abs(x - ballCenterX) < Math.abs(closest - ballCenterX) ? x : closest, targetList[0]);
+
+        //     const deltaX = Math.abs(ballCenterX - closestTarget);
+        //     if (deltaX <= margin) {
+        //         console.log(`✅ Ball ${ball.dataset.index || '?'} landed at correct target in list (ΔX=${deltaX.toFixed(1)}px)`);
+        //     } else {
+        //         console.log(`❌ Ball ${ball.dataset.index || '?'} missed target in list (ΔX=${deltaX.toFixed(1)}px)`);
+        //     }
+
+        //     // ✅ Tính toán ô multiplier bóng đã rơi vào
+        //     const multiplierBoxes = document.querySelectorAll('.multiplier-box');
+        //     for (let i = 0; i < multiplierBoxes.length; i++) {
+        //         const box = multiplierBoxes[i];
+        //         const boxLeft = parseFloat(box.style.left);
+        //         const boxRight = boxLeft + 40;
+
+        //         if (ballCenterX >= boxLeft && ballCenterX <= boxRight) {
+        //             hitMultiplier = true;
+        //             const multiplier = multipliers[i];
+        //             const winAmount = betAmount * multiplier;
+
+        //             if (winAmount > maxWin) {
+        //                 maxWin = winAmount;
+        //                 updateMaxWinDisplay();
+        //             }
+
+        //             balance += winAmount;
+        //             updateBalance();
+
+        //             if (winAmount >= 1000000) {
+        //                 showMessage('congratulations', 3000);
+        //             }
+
+        //             addResultItem(winAmount, multiplier);
+        //             applyMultiplierGlow(box);
+        //             break;
+        //         }
+        //     }
+
+        //     // ✅ Nếu không rơi vào multiplier nào
+        //     if (!hitMultiplier) {
+        //         balance += betAmount;
+        //         updateBalance();
+
+        //         const resultItem = document.createElement('div');
+        //         resultItem.className = 'result-item';
+        //         resultItem.textContent = `Returned: ₿${betAmount.toLocaleString()}`;
+        //         resultsDiv.insertBefore(resultItem, resultsDiv.firstChild);
+        //     }
+
+        //     checkGameOver();
+        // }
+
+
+        // Add result item to the results panel
+        function finishBall(ball, newLeftPx, betAmount) {
+            if (pegBoard.contains(ball)) pegBoard.removeChild(ball);
+
+            activeBallCount--;
+            if (activeBallCount === 0) {
+                const btn = document.getElementById('placeBetBtn');
+                btn.disabled = false;
+                btn.style.backgroundColor = '#2979ff';
+                btn.style.cursor = 'pointer';
+            }
+
+            balls = balls.filter(b => b !== ball);
+
+            const boardWidth = pegBoard.offsetWidth;
+            const ballCenterX = newLeftPx + ballSize / 2;
+
+            // 🎯 Convert target % → pixel trước khi so sánh
+            const targetListPercent = JSON.parse(ball.dataset.targetList || '[]');
+            const targetListPx = targetListPercent.map(percent => (percent / 100) * boardWidth);
+
+            //✨ bỏ đoạn so sánh này đi không cần
+            // // 🔍 Tìm target gần nhất theo pixel
+            // const closestTargetPx = targetListPx.reduce((closest, x) =>
+            //     Math.abs(x - ballCenterX) < Math.abs(closest - ballCenterX) ? x : closest,
+            //     targetListPx[0]
+            // );
+
+            // const deltaX = Math.abs(ballCenterX - closestTargetPx);
+            // const targetMargin = boardWidth * 0.02; // 2% margin (responsive)
+
+            // if (deltaX <= targetMargin) {
+            //     console.log(`✅ Ball ${ball.dataset.index || '?'} landed correctly (ΔX=${deltaX.toFixed(1)}px)`);
+            // } else {
+            //     console.log(`❌ Ball ${ball.dataset.index || '?'} missed target (ΔX=${deltaX.toFixed(1)}px)`);
+            // }
+
+            // 📦 Kiểm tra va chạm multiplier box
+            const multiplierBoxes = document.querySelectorAll('.multiplier-box');
+            for (let i = 0; i < multiplierBoxes.length; i++) {
+                const box = multiplierBoxes[i];
+                const boxRect = box.getBoundingClientRect();
+                const boardRect = pegBoard.getBoundingClientRect();
+
+                const boxLeft = boxRect.left - boardRect.left;
+                const boxRight = boxLeft + box.offsetWidth;
+
+                if (ballCenterX >= boxLeft && ballCenterX <= boxRight) {
+                    hitMultiplier = true;
+                    const multiplier = multipliers[i];
+                    const winAmount = betAmount * multiplier;
+
+                    if (winAmount > maxWin) {
+                        maxWin = winAmount;
+                        updateMaxWinDisplay();
+                    }
+
+                    balance += winAmount;
+                    updateBalance();
+
+                    if (winAmount >= 1000000) {
+                        showMessage('congratulations', 3000);
+                    }
+
+                    addResultItem(winAmount, multiplier);
+                    applyMultiplierGlow(box);
+                    break;
+                }
+            }
+
+
+            //✨ sửa ở đây  nếu không hit thì +0 ban đầu là +bet amount
+
+
+            // ⛔ Không rơi vào multiplier nào
+            if (!hitMultiplier) {
+                console.log("not hit");
+                balance += 0;
+                updateBalance();
+
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.textContent = `Returned: ₿${betAmount.toLocaleString()}`;
+                resultsDiv.insertBefore(resultItem, resultsDiv.firstChild);
+            }
+
+            checkGameOver();
+        }
+
+
+
+        function addResultItem(winAmount, multiplier) {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+
+            if (multiplier === 1000) resultItem.classList.add('red');
+            else if (multiplier === 0.2) resultItem.classList.add('yellow');
+            else if (multiplier === 130 || multiplier === 2) resultItem.classList.add('orange');
+
+            if (winAmount >= 1000000) {
+                resultItem.classList.add('rainbow-win');
+            }
+
+            resultItem.textContent = `Won: ₿${winAmount.toLocaleString()} (${multiplier}x)`;
+            resultsDiv.insertBefore(resultItem, resultsDiv.firstChild);
+        }
+
+        // Auto betting functionality
+        let autoBetInterval = null;
+        let currentBetDelay = 150;
+        const MIN_BET_DELAY = 50;
+        const ACCELERATION_RATE = 10;
+
+        function startAutoBet() {
+            if (autoBetInterval) return;
+            currentBetDelay = 150;
+            placeBet();
+
+            function autoBet() {
+                placeBet();
+                currentBetDelay = Math.max(MIN_BET_DELAY, currentBetDelay - ACCELERATION_RATE);
+                autoBetInterval = setTimeout(autoBet, currentBetDelay);
+            }
+
+            autoBetInterval = setTimeout(autoBet, currentBetDelay);
+        }
+
+        function stopAutoBet() {
+            if (autoBetInterval) {
+                clearTimeout(autoBetInterval);
+                autoBetInterval = null;
+            }
+        }
+
+        // All in functionality
+        function allIn() {
+            if (balance <= 0) {
+                showMessage('insufficientBalanceMessage', 2000);
+                return;
+            }
+            const betAmount = balance;
+            balance = 0;
+            updateBalance();
+            let ball = createBall(betAmount, 1, 9);
+            const velocityX = 0;// (Math.random() - 0.5) * 2;
+            const velocityY = 0;
+            animateBall(ball, velocityX, velocityY, betAmount)
+        }
+
+        // Reset game
+        function resetGame() {
+            balance = 1000;
+            updateBalance();
+            //document.getElementById('placeBetBtn').disabled = false;
+
+            resultsDiv.innerHTML = '';
+
+            balls.forEach(ball => pegBoard.removeChild(ball));
+            balls = [];
+
+            graphContainer.innerHTML = '';
+            balanceHistory = [balance];
+            maxWin = 0;
+            updateMaxWinDisplay();
+        }
+
+        // Update max win display
+        function updateMaxWinDisplay() {
+            const maxWinElement = document.getElementById('maxWin');
+            if (maxWin > 0) {
+                maxWinElement.textContent = `Max Win: ₿${maxWin.toLocaleString()}`;
+                maxWinElement.classList.add('visible');
+            } else {
+                maxWinElement.textContent = '';
+                maxWinElement.classList.remove('visible');
+            }
+        }
+
+        // Make game responsive on window resize
+        window.addEventListener('resize', function () {
+            // Recalculate positions of elements based on new window size
+            updateGraph();
+        });
+    </script>
+</body>
+
+</html>
